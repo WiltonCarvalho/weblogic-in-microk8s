@@ -151,7 +151,7 @@ curl -fSL# https://github.com/oracle/weblogic-kubernetes-operator/tarball/main |
 jar -cvf sample-domain1/archive.zip \
   -C /tmp/weblogic-kubernetes-operator/kubernetes/samples/quick-start/archive .
 ```
-# Domain FromModel
+# WebLogic Base Image
 ```
 docker login container-registry.oracle.com
 
@@ -163,6 +163,7 @@ docker tag \
 
 docker push localhost:32000/oracle/weblogic:14.1.1.0-11-ol8
 ```
+# Domain FromModel Single Image
 ```
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ./imagetool/bin/imagetool.sh update \
