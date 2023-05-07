@@ -151,7 +151,7 @@ curl -fSL# https://github.com/oracle/weblogic-kubernetes-operator/tarball/main |
 jar -cvf sample-domain1/archive.zip \
   -C /tmp/weblogic-kubernetes-operator/kubernetes/samples/quick-start/archive .
 ```
-# Domain in Image
+# Domain FromModel
 ```
 docker login container-registry.oracle.com
 
@@ -176,7 +176,7 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
   --chown oracle:root
 ```
 
-# Domain in Model Aux Image
+# Domain FromModel Aux Image
 ```
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ./imagetool/bin/imagetool.sh createAuxImage \
@@ -230,7 +230,7 @@ kubectl -n sample-domain1-ns \
   label secret sample-domain1-runtime-encryption-secret \
   weblogic.domainUID=sample-domain1
 ```
-# Deploy Model With Aux Image
+# Deploy Domain with Aux Image
 ```
 kubectl apply -f sample-domain1/domain-resource.yaml
 ```
@@ -250,7 +250,7 @@ google-chrome --incognito http://localhost:7001/console
 google-chrome --incognito http://192.168.122.40:7001/console
 
 ```
-# Sample App
+# Sample App Test
 ```
 CLUSTER_IP=$(kubectl -n sample-domain1-ns \
   get svc sample-domain1-cluster-cluster-1 -o jsonpath='{.spec.clusterIP}')
@@ -317,7 +317,7 @@ google-chrome --incognito http://192.168.122.40/console
 
 google-chrome --incognito http://192.168.122.40/quickstart
 ```
-# Deploy Single Image
+# Deploy Domain with Single Image
 ```
 cat <<'EOF'> sample-domain1/domain-resource-patch-single-image.yaml
 spec:
