@@ -113,11 +113,13 @@ kubectl -n weblogic-operator-ns get pod
 
 # WebLogic Deploy Tooling
 ```
-curl -fSL# https://github.com/oracle/weblogic-deploy-tooling/releases/latest/download/weblogic-deploy.zip \
+curl -fSL# \
+  https://github.com/oracle/weblogic-deploy-tooling/releases/latest/download/weblogic-deploy.zip \
   -o weblogic-deploy.zip
 ```
 ```
-curl -fSL# https://github.com/oracle/weblogic-image-tool/releases/latest/download/imagetool.zip \
+curl -fSL# \
+  https://github.com/oracle/weblogic-image-tool/releases/latest/download/imagetool.zip \
   -o imagetool.zip && unzip imagetool.zip && rm imagetool.zip
 ```
 ```
@@ -127,7 +129,8 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ./imagetool/bin/imagetool.sh cache deleteEntry --key wdt_latest
 ```
 ```
-./imagetool/bin/imagetool.sh cache addInstaller --type wdt --version latest --path ./weblogic-deploy.zip
+./imagetool/bin/imagetool.sh cache addInstaller \
+  --type wdt --version latest --path ./weblogic-deploy.zip
 ```
 
 # Quickstart Domain
@@ -135,7 +138,9 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 curl -fSL# https://github.com/oracle/weblogic-kubernetes-operator/tarball/main | \
   tar zxvf - -C . \
   --one-top-level=sample-domain1 \
-  --wildcards "*kubernetes/samples/quick-start/*.yaml" "*kubernetes/samples/quick-start/model.properties" \
+  --wildcards \
+  "*kubernetes/samples/quick-start/*.yaml" \
+  "*kubernetes/samples/quick-start/model.properties" \
   --strip-components=4
 ```
 # Quickstart App - /quickstart
@@ -193,10 +198,12 @@ docker push localhost:32000/quickstart-demo-app-aux-image:v1
 ```
 # Edit Domain Resources
 ```
-sed -i '/middleware/ s|image:.*|image: "localhost:32000/oracle/weblogic:14.1.1.0-11-ol8"|g' \
+sed -i \
+  '/middleware/ s|image:.*|image: "localhost:32000/oracle/weblogic:14.1.1.0-11-ol8"|g' \
   sample-domain1/domain-resource.yaml
 
-sed -i '/quick-start-aux-image:v1/ s|image:.*|image: "localhost:32000/quickstart-demo-app-aux-image:v1"|g' \
+sed -i \
+  '/quick-start-aux-image:v1/ s|image:.*|image: "localhost:32000/quickstart-demo-app-aux-image:v1"|g' \
   sample-domain1/domain-resource.yaml
 ```
 # Prepare to Deploy
