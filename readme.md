@@ -74,8 +74,8 @@ EOF
 kubectl apply -f test-ingress.yaml
 ```
 ```
-curl http://localhost
-curl https://localhost -k
+curl http://$NODE_IP
+curl https://$NODE_IP -k
 ```
 # Push Operator image to Microk8s Registry
 ```
