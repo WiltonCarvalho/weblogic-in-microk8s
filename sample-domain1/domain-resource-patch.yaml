@@ -1,0 +1,6 @@
+spec:
+  adminServer:
+    adminService:
+      channels:
+      - channelName: default
+        nodePort: 30701

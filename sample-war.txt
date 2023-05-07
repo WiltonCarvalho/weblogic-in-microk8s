@@ -1,0 +1,8 @@
+curl -fSL# https://github.com/oracle/docker-images/tarball/main | \
+  tar zxvf - -C /tmp \
+  --one-top-level=docker-images \
+  --wildcards "*OracleWebLogic/samples/12213-deploy-application/sample" \
+  --strip-components=1
+
+jar -cvf sample.war \
+  -C /tmp/docker-images/OracleWebLogic/samples/12213-deploy-application/sample .

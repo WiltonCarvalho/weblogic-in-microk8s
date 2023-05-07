@@ -1,0 +1,7 @@
+*
+!readme.md
+!wdt-in-docker.txt
+!sample-war.txt
+!.gitignore
+!sample-domain1
+!sample-domain1/*

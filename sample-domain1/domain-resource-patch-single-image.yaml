@@ -1,0 +1,5 @@
+spec:
+  configuration:
+    model:
+      auxiliaryImages: []
+  image: "localhost:32000/quickstart-demo-app-single-image:v1"

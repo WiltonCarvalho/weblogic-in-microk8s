@@ -1,0 +1,17 @@
+
+git clone https://github.com/oracle/docker-images.git
+
+cd docker-images/OracleWebLogic/samples/12213-domain-home-in-image-wdt
+
+curl -fsSL https://github.com/oracle/weblogic-deploy-tooling/releases/latest/download/weblogic-deploy.zip \
+  -o weblogic-deploy.zip
+
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
+./build-archive.sh
+
+docker build \
+  --build-arg WDT_MODEL=simple-topology.yaml \
+  --build-arg WDT_ARCHIVE=archive.zip \
+  --build-arg WDT_VARIABLE=properties/docker-build/domain.properties \
+  -t 12213-domain-home-in-image-wdt .
