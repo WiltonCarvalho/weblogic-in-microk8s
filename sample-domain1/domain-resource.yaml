@@ -23,10 +23,12 @@ spec:
       #   `sourceModelHome`      - Model file directory in image, default `/auxiliary/models`.
       #   `sourceWDTInstallHome` - WDT install directory in image, default `/auxiliary/weblogic-deploy`.
       auxiliaryImages:
-      - image: "localhost:32000/quickstart-demo-app-aux-image:v1"
+      - image: "localhost:32000/quickstart-aux-image:v1"
         #imagePullPolicy: IfNotPresent
         #sourceWDTInstallHome: /auxiliary/weblogic-deploy
         #sourceModelHome: /auxiliary/models
+      - image: "localhost:32000/sample-aux-image:v1"
+        sourceWDTInstallHome: None
 
       # Optional configmap for additional models and variable files
       #configMap: sample-domain1-wdt-config-map
@@ -129,6 +131,7 @@ spec:
     # (the model yaml in the optional configMap or in the image)
     #secrets:
     #- sample-domain1-datasource-secret
+
 ---
 
 apiVersion: "weblogic.oracle/v1"

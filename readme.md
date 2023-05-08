@@ -12,7 +12,7 @@ snap install microk8s --classic --channel=1.24/stable
 # Container Tools
 ```
 apt update
-apt -y install curl unzip docker.io skopeo openjdk-11-jdk-headless
+apt -y install curl zip unzip docker.io skopeo openjdk-11-jdk-headless
 ```
 # Alias
 ```
@@ -133,36 +133,34 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
   --type wdt --version latest --path ./weblogic-deploy.zip
 ```
 
-# Quickstart Domain
+# Sample Domain
 ```
 curl -fSL# https://github.com/oracle/weblogic-kubernetes-operator/tarball/main | \
   tar zxvf - -C . \
   --one-top-level=sample-domain1 \
   --wildcards \
-  "*kubernetes/samples/quick-start/*.yaml" \
-  "*kubernetes/samples/quick-start/model.properties" \
+  "*kubernetes/samples/quick-start/domain-resource.yaml" \
   --strip-components=4
 ```
 # Quickstart App - /quickstart
 ```
 curl -fSL# https://github.com/oracle/weblogic-kubernetes-operator/tarball/main | \
   tar zxvf - -C . \
-  --one-top-level=demo-apps \
-  --wildcards "*kubernetes/samples/quick-start/archive/wlsdeploy/applications/quickstart" \
-  --strip-components=3
-```
-# Sample App - /sample
-```
-curl -fSL# https://github.com/oracle/docker-images/tarball/main | \
-  tar zxvf - -C . \
-  --one-top-level=demo-apps \
-  --wildcards "*OracleWebLogic/samples/12213-deploy-application/sample" \
+  --one-top-level=demo-apps/quickstart \
+  --wildcards \
+    "*kubernetes/samples/quick-start/archive/wlsdeploy/applications/quickstart" \
+    "*kubernetes/samples/quick-start/model.yaml" \
+    "*kubernetes/samples/quick-start/model.properties" \
   --strip-components=4
 ```
-# WSL Quickstart Artifact
+# WSL Quickstart Model
 ```
-jar -cvf sample-domain1/archive.zip \
-  -C demo-apps/quick-start/archive .
+mv demo-apps/quickstart/model.yaml demo-apps/quickstart/quickstart-model.yaml
+mv demo-apps/quickstart/model.properties demo-apps/quickstart/quickstart-model.properties
+```
+# WSL Quickstart Archive
+```
+(cd demo-apps/quickstart/archive; zip -r ../quickstart-archive.zip wlsdeploy;)
 ```
 # Create an Oracle Account
 - https://login.oracle.com
@@ -185,11 +183,11 @@ docker push localhost:32000/oracle/weblogic:14.1.1.0-11-ol8
 ```
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ./imagetool/bin/imagetool.sh update \
-  --tag localhost:32000/quick-start-single-image:v1 \
+  --tag localhost:32000/quickstart-single-image:v1 \
   --fromImage localhost:32000/oracle/weblogic:14.1.1.0-11-ol8 \
-  --wdtModel      sample-domain1/model.yaml \
-  --wdtVariables  sample-domain1/model.properties \
-  --wdtArchive    sample-domain1/archive.zip \
+  --wdtModel      demo-apps/quickstart/quickstart-model.yaml \
+  --wdtVariables  demo-apps/quickstart/quickstart-model.properties \
+  --wdtArchive    demo-apps/quickstart/quickstart-archive.zip \
   --wdtModelOnly \
   --wdtDomainType WLS \
   --chown oracle:root
@@ -199,15 +197,16 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ```
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ./imagetool/bin/imagetool.sh createAuxImage \
-  --tag localhost:32000/quick-start-aux-image:v1 \
-  --wdtModel      sample-domain1/model.yaml \
-  --wdtVariables  sample-domain1/model.properties \
-  --wdtArchive    sample-domain1/archive.zip
+  --tag localhost:32000/quickstart-aux-image:v1 \
+  --wdtModel      demo-apps/quickstart/quickstart-model.yaml \
+  --wdtVariables  demo-apps/quickstart/quickstart-model.properties \
+  --wdtArchive    demo-apps/quickstart/quickstart-archive.zip \
+  --wdtHome       /auxiliary
 ```
 # Push Domain images to Microk8s Registry
 ```
-docker push localhost:32000/quick-start-single-image:v1
-docker push localhost:32000/quick-start-aux-image:v1
+docker push localhost:32000/quickstart-single-image:v1
+docker push localhost:32000/quickstart-aux-image:v1
 ```
 # Edit Domain Resources
 ```
@@ -216,7 +215,7 @@ sed -i \
   sample-domain1/domain-resource.yaml
 
 sed -i \
-  '/quick-start-aux-image:v1/ s|image:.*|image: "localhost:32000/quick-start-aux-image:v1"|g' \
+  '/quick-start-aux-image:v1/ s|image:.*|image: "localhost:32000/quickstart-aux-image:v1"|g' \
   sample-domain1/domain-resource.yaml
 ```
 # Prepare to Deploy
@@ -271,7 +270,7 @@ google-chrome --incognito http://localhost:7001/console
 google-chrome --incognito http://192.168.122.40:7001/console
 
 ```
-# Sample App Test
+# Quickstart App Test
 ```
 CLUSTER_IP=$(kubectl -n sample-domain1-ns \
   get svc sample-domain1-cluster-cluster-1 -o jsonpath='{.spec.clusterIP}')
@@ -299,14 +298,42 @@ kubectl -n sample-domain1-ns get svc
 google-chrome --incognito http://192.168.122.40:30701/console
 ```
 
-# Ingress
+# Console Ingress
 ```
-cat <<'EOF'> sample-domain1/ingress-route.yaml
----
+cat <<'EOF'> sample-domain1/ingress-route-console.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: sample-domain1-ingress
+  name: sample-domain1-ingress-console
+  namespace: sample-domain1-ns
+spec:
+  ingressClassName: public
+  rules:
+    - http:
+        paths:
+          - path: /console
+            pathType: Prefix
+            backend:
+              service:
+                name: sample-domain1-admin-server
+                port:
+                  number: 7001
+EOF
+```
+```
+kubectl apply -f sample-domain1/ingress-route-console.yaml
+
+kubectl -n sample-domain1-ns get ingress
+
+google-chrome --incognito http://192.168.122.40/console
+```
+# Quickstart Ingress
+```
+cat <<'EOF'> sample-domain1/ingress-route-quickstart.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sample-domain1-ingress-quickstart
   namespace: sample-domain1-ns
 spec:
   ingressClassName: public
@@ -320,21 +347,12 @@ spec:
                 name: sample-domain1-cluster-cluster-1
                 port:
                   number: 8001
-          - path: /console
-            pathType: Prefix
-            backend:
-              service:
-                name: sample-domain1-admin-server
-                port:
-                  number: 7001
 EOF
 ```
 ```
-kubectl apply -f sample-domain1/ingress-route.yaml
+kubectl apply -f sample-domain1/ingress-route-quickstart.yaml
 
 kubectl -n sample-domain1-ns get ingress
-
-google-chrome --incognito http://192.168.122.40/console
 
 google-chrome --incognito http://192.168.122.40/quickstart
 ```
@@ -345,7 +363,7 @@ spec:
   configuration:
     model:
       auxiliaryImages: []
-  image: "localhost:32000/quick-start-single-image:v1"
+  image: "localhost:32000/quickstart-single-image:v1"
 EOF
 ```
 ```
@@ -357,6 +375,85 @@ kubectl -n sample-domain1-ns \
   describe domain sample-domain1
 
 kubectl -n sample-domain1-ns get pods --watch
+```
+# Sample App - /sample
+```
+curl -fSL# https://github.com/oracle/docker-images/tarball/main | \
+  tar zxvf - -C . \
+  --one-top-level=demo-apps/sample/archive/wlsdeploy/applications \
+  --wildcards "*OracleWebLogic/samples/12213-deploy-application/sample" \
+  --strip-components=4
+
+rm -rf demo-apps/sample/archive/wlsdeploy/applications/sample/META-INF
+```
+# WSL Sample Archive
+```
+(cd demo-apps/sample/archive; zip -r ../sample-archive.zip wlsdeploy;)
+```
+# WSL Sample Model
+```
+cp demo-apps/quickstart/quickstart-model.yaml demo-apps/sample/sample-model.yaml
+cp demo-apps/quickstart/quickstart-model.properties demo-apps/sample/sample-model.properties
+
+sed -i \
+  -e 's|applications/quickstart|applications/sample|g' \
+  -e 's|quickstart:|sample:|g' \
+  demo-apps/sample/sample-model.yaml
+```
+# Domain FromModel Aux Sample Image
+```
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+./imagetool/bin/imagetool.sh createAuxImage \
+  --tag localhost:32000/sample-aux-image:v1 \
+  --wdtModel      demo-apps/sample/sample-model.yaml \
+  --wdtVariables  demo-apps/sample/sample-model.properties \
+  --wdtArchive    demo-apps/sample/sample-archive.zip \
+  --wdtHome       /auxiliary
+```
+# Push Sample image to Microk8s Registry
+```
+docker push localhost:32000/sample-aux-image:v1
+```
+# Add the Sample app to sample-domain1
+```
+vi sample-domain1/domain-resource.yaml
+# Add
+#       - image: "localhost:32000/sample-aux-image:v1"
+#         sourceWDTInstallHome: None
+```
+```
+kubectl apply -f sample-domain1/domain-resource.yaml
+
+kubectl -n sample-domain1-ns get pod
+```
+# Sample Ingress
+```
+cat <<'EOF'> sample-domain1/ingress-route-sample.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sample-domain1-ingress-sample
+  namespace: sample-domain1-ns
+spec:
+  ingressClassName: public
+  rules:
+    - http:
+        paths:
+          - path: /sample
+            pathType: Prefix
+            backend:
+              service:
+                name: sample-domain1-cluster-cluster-1
+                port:
+                  number: 8001
+EOF
+```
+```
+kubectl apply -f sample-domain1/ingress-route-sample.yaml
+
+kubectl -n sample-domain1-ns get ingress
+
+google-chrome --incognito http://192.168.122.40/sample
 ```
 # Delete
 ```

@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sample-domain1-ingress-sample
+  namespace: sample-domain1-ns
+spec:
+  ingressClassName: public
+  rules:
+    - http:
+        paths:
+          - path: /sample
+            pathType: Prefix
+            backend:
+              service:
+                name: sample-domain1-cluster-cluster-1
+                port:
+                  number: 8001
