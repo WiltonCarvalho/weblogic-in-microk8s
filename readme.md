@@ -156,6 +156,11 @@ curl -fSL# https://github.com/oracle/weblogic-kubernetes-operator/tarball/main |
 jar -cvf sample-domain1/archive.zip \
   -C /tmp/weblogic-kubernetes-operator/kubernetes/samples/quick-start/archive .
 ```
+# Create an Oracle Account
+- https://login.oracle.com
+# Log in the Registry webpage, Search for Weblogic and Accept the License Agreement
+- "You must agree to and accept the Oracle Standard Terms and Restrictions prior to downloading from the Oracle Container Registry"
+- https://container-registry.oracle.com
 # WebLogic Base Image
 ```
 docker login container-registry.oracle.com
