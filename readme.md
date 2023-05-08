@@ -77,7 +77,7 @@ kubectl apply -f test-ingress.yaml
 curl http://$NODE_IP
 curl https://$NODE_IP -k
 ```
-# Push Operator image to Microk8s Registry
+# Push WebLogic Operator image to Microk8s Registry
 ```
 docker pull ghcr.io/oracle/weblogic-kubernetes-operator:4.0.5
 
@@ -146,15 +146,23 @@ curl -fSL# https://github.com/oracle/weblogic-kubernetes-operator/tarball/main |
 # Quickstart App - /quickstart
 ```
 curl -fSL# https://github.com/oracle/weblogic-kubernetes-operator/tarball/main | \
-  tar zxvf - -C /tmp \
-  --one-top-level=weblogic-kubernetes-operator \
+  tar zxvf - -C . \
+  --one-top-level=demo-apps \
   --wildcards "*kubernetes/samples/quick-start/archive/wlsdeploy/applications/quickstart" \
-  --strip-components=1
+  --strip-components=3
 ```
-# WSL Artifact
+# Sample App - /sample
+```
+curl -fSL# https://github.com/oracle/docker-images/tarball/main | \
+  tar zxvf - -C . \
+  --one-top-level=demo-apps \
+  --wildcards "*OracleWebLogic/samples/12213-deploy-application/sample" \
+  --strip-components=4
+```
+# WSL Quickstart Artifact
 ```
 jar -cvf sample-domain1/archive.zip \
-  -C /tmp/weblogic-kubernetes-operator/kubernetes/samples/quick-start/archive .
+  -C demo-apps/quick-start/archive .
 ```
 # Create an Oracle Account
 - https://login.oracle.com
@@ -177,7 +185,7 @@ docker push localhost:32000/oracle/weblogic:14.1.1.0-11-ol8
 ```
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ./imagetool/bin/imagetool.sh update \
-  --tag localhost:32000/quickstart-demo-app-single-image:v1 \
+  --tag localhost:32000/quick-start-single-image:v1 \
   --fromImage localhost:32000/oracle/weblogic:14.1.1.0-11-ol8 \
   --wdtModel      sample-domain1/model.yaml \
   --wdtVariables  sample-domain1/model.properties \
@@ -191,15 +199,15 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ```
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ./imagetool/bin/imagetool.sh createAuxImage \
-  --tag localhost:32000/quickstart-demo-app-aux-image:v1 \
+  --tag localhost:32000/quick-start-aux-image:v1 \
   --wdtModel      sample-domain1/model.yaml \
   --wdtVariables  sample-domain1/model.properties \
   --wdtArchive    sample-domain1/archive.zip
 ```
 # Push Domain images to Microk8s Registry
 ```
-docker push localhost:32000/quickstart-demo-app-single-image:v1
-docker push localhost:32000/quickstart-demo-app-aux-image:v1
+docker push localhost:32000/quick-start-single-image:v1
+docker push localhost:32000/quick-start-aux-image:v1
 ```
 # Edit Domain Resources
 ```
@@ -208,7 +216,7 @@ sed -i \
   sample-domain1/domain-resource.yaml
 
 sed -i \
-  '/quick-start-aux-image:v1/ s|image:.*|image: "localhost:32000/quickstart-demo-app-aux-image:v1"|g' \
+  '/quick-start-aux-image:v1/ s|image:.*|image: "localhost:32000/quick-start-aux-image:v1"|g' \
   sample-domain1/domain-resource.yaml
 ```
 # Prepare to Deploy
@@ -337,7 +345,7 @@ spec:
   configuration:
     model:
       auxiliaryImages: []
-  image: "localhost:32000/quickstart-demo-app-single-image:v1"
+  image: "localhost:32000/quick-start-single-image:v1"
 EOF
 ```
 ```

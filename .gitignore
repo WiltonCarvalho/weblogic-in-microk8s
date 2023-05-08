@@ -4,4 +4,6 @@
 !sample-war.txt
 !.gitignore
 !sample-domain1
-!sample-domain1/*
+!sample-domain1/**
+!demo-apps
+!demo-apps/**
