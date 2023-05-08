@@ -26,6 +26,6 @@ topology:
 appDeployments:
     Application:
         sample:
-            SourcePath: wlsdeploy/applications/sample
+            SourcePath: wlsdeploy/applications/sample.war
             ModuleType: war
             Target: cluster-1

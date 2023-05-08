@@ -384,7 +384,10 @@ curl -fSL# https://github.com/oracle/docker-images/tarball/main | \
   --wildcards "*OracleWebLogic/samples/12213-deploy-application/sample" \
   --strip-components=4
 
-rm -rf demo-apps/sample/archive/wlsdeploy/applications/sample/META-INF
+jar -cvf demo-apps/sample/archive/wlsdeploy/applications/sample.war \
+  -C demo-apps/sample/archive/wlsdeploy/applications/sample .
+
+rm -rf demo-apps/sample/archive/wlsdeploy/applications/sample
 ```
 # WSL Sample Archive
 ```
@@ -396,7 +399,7 @@ cp demo-apps/quickstart/quickstart-model.yaml demo-apps/sample/sample-model.yaml
 cp demo-apps/quickstart/quickstart-model.properties demo-apps/sample/sample-model.properties
 
 sed -i \
-  -e 's|applications/quickstart|applications/sample|g' \
+  -e 's|applications/quickstart|applications/sample.war|g' \
   -e 's|quickstart:|sample:|g' \
   demo-apps/sample/sample-model.yaml
 ```
