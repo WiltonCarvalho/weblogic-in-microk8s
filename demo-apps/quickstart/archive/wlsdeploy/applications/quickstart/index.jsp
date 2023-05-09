@@ -15,7 +15,7 @@ import="java.net.InetAddress"%>
 <!DOCTYPE html>
 <html>
 <body>
-        <h1>Welcome to the WebLogic on Kubernetes Quick Start Sample</font></h1><br>
+        <h1>Welcome to the WebLogic on Microk8s Quick Start Sample</font></h1><br>
 	<%
 		StringBuffer message = new StringBuffer();
 		message.append("<b>WebLogic Server Name:</b> " + System.getProperty("weblogic.Name"));

@@ -12,7 +12,7 @@ snap install microk8s --classic --channel=1.24/stable
 # Container Tools
 ```
 apt update
-apt -y install curl zip unzip docker.io skopeo openjdk-11-jdk-headless
+apt -y install curl zip unzip docker.io openjdk-11-jdk-headless
 ```
 # Alias
 ```
@@ -160,7 +160,10 @@ mv demo-apps/quickstart/model.properties demo-apps/quickstart/quickstart-model.p
 ```
 # WSL Quickstart Archive
 ```
-(cd demo-apps/quickstart/archive; zip -r ../quickstart-archive.zip wlsdeploy;)
+(
+  cd demo-apps/quickstart/archive;
+  zip -r ../quickstart-archive.zip wlsdeploy;
+)
 ```
 # Create an Oracle Account
 - https://login.oracle.com
@@ -376,7 +379,7 @@ kubectl -n sample-domain1-ns \
 
 kubectl -n sample-domain1-ns get pods --watch
 ```
-# Sample App - /sample
+# Sample App WAR - /sample
 ```
 curl -fSL# https://github.com/oracle/docker-images/tarball/main | \
   tar zxvf - -C . \
@@ -391,7 +394,10 @@ rm -rf demo-apps/sample/archive/wlsdeploy/applications/sample
 ```
 # WSL Sample Archive
 ```
-(cd demo-apps/sample/archive; zip -r ../sample-archive.zip wlsdeploy;)
+(
+  cd demo-apps/sample/archive;
+  zip -r ../sample-archive.zip wlsdeploy;
+)
 ```
 # WSL Sample Model
 ```
@@ -457,6 +463,49 @@ kubectl apply -f sample-domain1/ingress-route-sample.yaml
 kubectl -n sample-domain1-ns get ingress
 
 google-chrome --incognito http://192.168.122.40/sample
+```
+# Update the Quickstart App
+```
+sed 's/Kubernetes/Microk8s/g' \
+  -i demo-apps/quickstart/archive/wlsdeploy/applications/quickstart/index.jsp
+```
+# Update the Quickstart Archive
+```
+(
+  cd demo-apps/quickstart/archive;
+  zip -r ../quickstart-archive.zip wlsdeploy;
+)
+```
+# Update the Quickstart Aux Image
+```
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+./imagetool/bin/imagetool.sh createAuxImage \
+  --tag localhost:32000/quickstart-aux-image:v2 \
+  --wdtModel      demo-apps/quickstart/quickstart-model.yaml \
+  --wdtVariables  demo-apps/quickstart/quickstart-model.properties \
+  --wdtArchive    demo-apps/quickstart/quickstart-archive.zip \
+  --wdtHome       /auxiliary
+```
+# Push the Quickstart Image to Microk8s Registry
+```
+docker push localhost:32000/quickstart-aux-image:v2
+```
+# Update the Quickstart Image Tag
+```
+sed '/quickstart-aux-image/ s|image:.*|image: "localhost:32000/quickstart-aux-image:v2"|g' \
+  -i sample-domain1/domain-resource.yaml
+```
+```
+kubectl apply -f sample-domain1/domain-resource.yaml
+
+kubectl -n sample-domain1-ns get pod
+```
+# Quickstart App Test
+```
+CLUSTER_IP=$(kubectl -n sample-domain1-ns \
+  get svc sample-domain1-cluster-cluster-1 -o jsonpath='{.spec.clusterIP}')
+
+curl -fsSL http://$CLUSTER_IP:8001/quickstart
 ```
 # Delete
 ```
